@@ -1,17 +1,18 @@
 from copy import deepcopy
 import pygame as pg
 import numpy as np
-import random, time, sys
-import multiprocessing as mp
-from multiprocessing import Pool, Manager
+import requests, copy, random, time, sys, lxml.html, math
 from lxml.html import *
 from dataclasses import dataclass
 from operator import itemgetter
 from pygame.color import THECOLORS
+import multiprocessing as mp
+from multiprocessing import Pool, Manager
 
 from pprint import pprint
 
 sys.setrecursionlimit(987654321)
+clock = pg.time.Clock()
 
 X_INDENT = 10
 Y_INDENT = 5
@@ -21,7 +22,7 @@ INF = np.inf
 generation_size = 30
 next_gen_p = 5
 learning_generation = 100
-weight_num = 9
+weight_num = 8
 
 mutation_chance = 0.1
 mutation_range = 20
@@ -34,7 +35,6 @@ RoofWeight = 4
 AdhereWallWeight = 5
 AdhereFloorWeight = 6
 DenseWeight = 7
-ComboWeight = 8
 
 #weight = [50, -15, -15, -15, -20, 10, 5, 10]
 
@@ -213,7 +213,7 @@ def mutate(child):
         chance = random.random()
         if chance < mutation_chance:
             child[i] += random.randint(-mutation_range, mutation_range)
-        if i == LineWeight or i == AdhereWallWeight or i == AdhereFloorWeight or i == DenseWeight or i == ComboWeight:
+        if i == 0 or i == 5 or i == 6 or i == 7:
             child[i] = abs(child[i])
         else: child[i] = -abs(child[i])
     child[weight_num] = 0
@@ -224,15 +224,15 @@ def mutate(child):
 # STARTING WITH SPECIFIC GENE SET ↓ ↓ ↓ ↓ ↓ ↓ ↓ ↓ ↓ ↓ ↓ ↓ ↓ ↓ ↓ ↓ ↓ ↓ ↓ ↓ ↓
 
 generation = [
-    [28, -33, 0, -23, -81, 12, 47, 20, 3],
+    [40, -26, -3, -23, -81, 15, 47, 17, 0],
 
-    [40, -41, -2, -23, -81, 15, 47, 30, 31],
+    [40, -26, -2, -23, -81, 14, 47, 16, 0],
 
-    [38, -26, -2, -18, -81, 15, 47, 16, 31],
+    [40, -26, -4, -23, -81, 14, 47, 20, 0],
 
-    [40, -41, -2, -23, -81, 12, 47, 17, 31],
+    [94, -26, -16, -23, -81, 14, 47, 16, 0],
 
-    [40, -43, -2, -23, -81, 12, 47, 17, 31]
+    [94, -26, -16, -23, -81, 15, 47, 16, 0]
 ]
 
 generation = make_next_gen(generation)
@@ -262,7 +262,7 @@ def randomblock():
 
 def PPRINT(board): # For debugging
     if DEBUG: return
-    for i in range(15,25):
+    for i in range(5,25):
         for j in range(10,20):
             if(board[i][j]):print('■',end='')
             else: print('□',end='')
@@ -289,8 +289,6 @@ def PRINT_VISIT(board):
     print('- - - - - - - - - -')
 
 def getdensity(board, priv_board):
-    global board_reset
-    visit = deepcopy(board_reset)
     cnt = 0
     for i in range(5, 25):
         for j in range(10, 20):
@@ -299,9 +297,7 @@ def getdensity(board, priv_board):
                     n = k*2
                     p = i + dx[n]
                     q = j + dy[n]
-                    if not priv_board[p][q] and board[p][q] and not visit[p][q]:
-                        cnt += 1
-                        visit[p][q] = 1;
+                    if not priv_board[p][q] and board[p][q]: cnt += 1
     return cnt
 
 def removeline(board):
@@ -381,7 +377,7 @@ def getmaxlevel(board):
             return i
     return 24
 
-def evaluation(board, priv_board, weight, block_shape, combo): # Evaluates a state of a block by certain factors
+def evaluation(board, priv_board, weight, block_shape): # Evaluates a state of a block by certain factors
     global dfscnt
     score = 0
     LineFill = 0
@@ -393,7 +389,6 @@ def evaluation(board, priv_board, weight, block_shape, combo): # Evaluates a sta
     Roof = 0
     MaxLevel = 0
     Density = 0
-    ComboAlive = False
 
     board, LineFill = removeline(board)
     
@@ -453,13 +448,8 @@ def evaluation(board, priv_board, weight, block_shape, combo): # Evaluates a sta
                     t -= 1
                     Roof += 1
 
-    #if block_shape == block_j or block_shape == block_l or block_shape == block_s or block_shape == block_z:
-    #    score += (LineFill * weight[LineWeight]) // 2
-    
-    score += (LineFill ** 2) * weight[LineWeight]
 
-    #if block_shape == block_j or block_shape == block_l or block_shape == block_s or block_shape == block_z:
-    #    score += Holecnt * weight[HoleWeight] * 2
+    score += LineFill * weight[LineWeight]
 
     score += Holecnt * weight[HoleWeight]
 
@@ -475,31 +465,19 @@ def evaluation(board, priv_board, weight, block_shape, combo): # Evaluates a sta
 
     score += Density * weight[DenseWeight]
 
-    if combo and LineFill:
-        score += weight[ComboWeight]
-        ComboAlive = True
-
     if 0:
-        print('LineFill : %d' % LineFill)
-        print('Holecnt : %d' % Holecnt)
-        print('BlockHole : %d' % BlockHole)
-        print('AdhereWall : %d' % AdhereWall)
-        print('AdhereFloor : %d' % AdhereFloor)
-        print('Roof : %d' % Roof)
-        print('MaxLevel : %d' % MaxLevel)
-        print('Density : %d' % Density)
-        print('Combo :', ComboAlive)
+        print('L H HC  B AW AF R  M D')
+        print('%d %d %2d %2d %2d %2d %d %2d %d' % (LineFill, Hole, Holecnt, BlockHole, AdhereWall, AdhereFloor, Roof, MaxLevel, Density))
         print(score)
         #st = 'L H HC  B AW AF R  M D\n'
         #st += '%d %d %2d %2d %2d %2d %d %2d %d\n%d\n' % (LineFill, Hole, Holecnt, BlockHole, AdhereWall, AdhereFloor, Roof, MaxLevel, Density, score)
         #txt.write(st)
     dfscnt = 0
-    if MaxLevel >= 20: return -INF, False
-    return score, ComboAlive
+    if MaxLevel >= 20: return -INF
+    return score
 
-def best_location(board, block_shape, weight, combo): # Finding the best location and shape for a block, by simulating all 40(can be lower) situations
+def best_location(board, block_shape, weight): # Finding the best location and shape for a block, by simulating all 40(can be lower) situations
     best_possible = []
-    comboalive = False
 
     for i in range(len(block_shape)):
         block_type = block_shape[i]
@@ -507,11 +485,10 @@ def best_location(board, block_shape, weight, combo): # Finding the best locatio
         for x in range(0, 11 - length_block(block_type)):
             next_board = deepcopy(board)
             next_board = block_simulate(next_board, block_type, x)
-            score, comboalive = evaluation(next_board, board, weight, block_shape, combo)
-            score_set = [score, i, x, comboalive]
+            score = evaluation(next_board, board, weight, block_shape)
+            score_set = [score, i, x]
             best_possible.append(score_set)
     
-    best_possible.sort(key=itemgetter(3), reverse=True)
     best_possible.sort(key=itemgetter(0), reverse=True)
     return best_possible[0]
 
@@ -519,16 +496,23 @@ def block_simulate(board, block_type, x):
     board = block_drop(board, block_type, x)
     if 0:
         PPRINT(board)
+        #PRINT_F(board)
     return board
 
-def play_game(weight, gen, child):
-    gen += 1
-    child += 1
+#game_board = block_drop(game_board, block_i[1], 0)
+#game_board = block_drop(game_board, block_i[1], 3)
+#game_board = block_drop(game_board, block_i[0], 0)
+#
+#best_location(game_board, block_t)
+
+
+def play_game(weight):
     global game_board
     line_del = 0
     line_score = 0
-    Combo = 0
     game_board = deepcopy(board_reset)
+
+    sprintbegin = time.time()
 
     pg.init()
     pg.display.set_caption('Tetris')
@@ -541,22 +525,16 @@ def play_game(weight, gen, child):
     font2 = pg.font.SysFont('consolas', 20, True, False)
 
     string1 = font.render("Next:", True, BLACK)
-    string2 = font2.render('Gen ', True, BLACK)
-    string_gen = font2.render(str(gen), True, BLACK)
-    string_child = font.render('%2d' % child + '/' + str(generation_size), True, BLACK)
-    string3 = font2.render('Score', True, BLACK)
-    string_score = font2.render(str(line_score), True, BLACK)
-    string4 = font2.render('Combo', True, BLACK)
-    string_combo = font2.render(str(Combo), True, BLACK)
+    string2 = font.render('Score', True, BLACK)
+    string3 = font.render(str(line_score), True, BLACK)
+    string4 = font2.render('Time', True, BLACK)
+    string_time = font2.render('0:00:00', True, BLACK)
 
     screen.blit(string1, [185, 5])
     screen.blit(string2, [185, 95])
-    screen.blit(string_gen, [235, 95])
-    screen.blit(string_child, [185, 125])
-    screen.blit(string3, [185, 185])
-    screen.blit(string_score, [185, 215])
-    screen.blit(string4, [185, 245])
-    screen.blit(string_combo, [185, 275])
+    screen.blit(string3, [185, 125])
+    screen.blit(string4, [185, 230])
+    screen.blit(string_time, [185, 260])
 
     for i in range(1, 22):
         pg.draw.rect(screen, [0, 0, 0], [5, 5+15*(i-1), 12, 12], 0)
@@ -572,7 +550,7 @@ def play_game(weight, gen, child):
     while running:
         if len(next_blocks) <= 3:
             next_blocks.extend(randomblock())
-        next_place = best_location(game_board, next_blocks[0], weight, Combo)
+        next_place = best_location(game_board, next_blocks[0], weight)
         #print(next_place)
         game_board = block_drop(game_board, next_blocks[0][next_place[1]], next_place[2])
 
@@ -598,87 +576,64 @@ def play_game(weight, gen, child):
                     pg.draw.rect(screen, [128, 128, 128], [5+15*(j-9), 5+15*(i-5), 12, 12], 1)
 
         pg.display.flip()
+        #time.sleep(0.15)
 
         game_board, line_del = removeline(game_board)
         line_score += line_del ** 2
-        string_score = font2.render(str(line_score), True, BLACK)
-        if line_del: Combo += 1
-        else: Combo = 0
+
+        string3 = font.render(str(line_score), True, BLACK)
+
+        current_time = round(time.time() - sprintbegin, 2)
+        if current_time >= 3600: str_time = '59:59:99'
+        else:
+            current_min = round(current_time//60)
+            current_sec = np.floor(current_time%60)
+            current_milsec = round((current_time%1), 2) * 100
+            str_time = '%02d' % current_min + ':' +'%02d' % current_sec + ':' + '%02d' % current_milsec
         
-        # Screen Clearing
+        string_time = font2.render(str_time, True, BLACK)
+        
         for i in range(5, 25):
             for j in range(X_INDENT, X_INDENT+10):
                 pg.draw.rect(screen, WHITE,[5+15*(j-9), 5+15*(i-5), 15, 15])
 
-        pg.draw.rect(screen, WHITE, [185, 215, 100, 30])
+        pg.draw.rect(screen, WHITE, [185, 125, 100, 100])
+        pg.draw.rect(screen, WHITE, [185, 260, 100, 30])
 
         for i in range(5, 25):
             for j in range(X_INDENT, X_INDENT+10):
                 if game_board[i][j]:
                     pg.draw.rect(screen, [128, 128, 128], [5+15*(j-9), 5+15*(i-5), 12, 12], 1)
 
-        screen.blit(string_score, [185, 215])
-
-        string_combo = font2.render(str(Combo), True, BLACK)
-
-        pg.draw.rect(screen, WHITE, [185, 275, 100, 30])
-
-        screen.blit(string_combo, [185, 275])
+        screen.blit(string3, [185, 125])
+        screen.blit(string_time, [185, 260])
 
         pg.display.flip()
 
         if(getmaxlevel(game_board)) <= 5:
             running = False
-            print('Gen #%d, Child #%d, Score : %d' % (gen, child, line_score))
+            print('Game Over\nBest Score : %d' % (line_score))
             break
 
         for event in pg.event.get():
             if event.type == pg.QUIT:
                 running = False
-                print('Gen #%d, Child #%d (Terminated), Score : %d' % (gen, child, line_score))
+                print('Game has been Terminated\nScore : %d' % (line_score))
                 break
 
         del next_blocks[0]
-        #time.sleep(0.01)
+        #time.sleep(0.15)
     return line_score
 
+Gene = [40, -26, -2, -23, -71, 14, 33, 16]
+Gene = [94, -35, -16, -23, -81, 15, 47, 16]
+
 if __name__ == '__main__':
-    for gen in range(learning_generation):
-        manager = Manager()
-        gen_result = manager.list()
-
-        play_score = []
-        next_gen = []
-
-        cores = 5
-        pool = mp.Pool(cores)
-        gen_result = pool.starmap(play_game, [(generation[child], gen, child) for child in range(generation_size)])
-        gen_result = list(gen_result)
-
-        #for child in range(generation_size):
-        #    generation[child][weight_num] = play_game(generation[child], gen, child)
-        #    play_score.append(generation[child])
-
-        for child in range(generation_size):
-            generation[child][weight_num] = gen_result[child]
-            play_score.append(generation[child])
-
-        play_score.sort(key=itemgetter(weight_num), reverse=True)
-
-        txt = open('./Weights_1.1.txt', 'a')
-        pprint(play_score[0])
-        for nxt in range(0,5):
-            st = ''
-            for i in play_score[nxt]:
-                st += '%7d,' % i
-            txt.write('[ ' + st + ' ] #' + str(gen+1) + '\n')
-        txt.write('- - - - - - - - - - - - - - - - - - - - - - - - - #' + str(gen+1) + '\n\n')
-
-        for child in range(next_gen_p):
-            next_gen.append(play_score[child])
-        txt.close()
-
-        generation = make_next_gen(next_gen)
-
-        for child in generation:
-            mutate(child)
+    manager = mp.Manager()
+    res = manager.list()
+    cores = 5
+    pool = mp.Pool(cores)
+    result = pool.map(play_game, [(Gene) for i in range(0, 5)])
+    pool.close()
+    pool.join()
+    print(list(result))
