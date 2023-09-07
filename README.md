@@ -86,13 +86,13 @@
     테트리스에는 다음과 같이 총 7가지의 블록 모양이 존재한다.
 
     <p align='center'>
-        <img src="images/tetris-i.png" width="100px" height="25px"/>
-        <img src="images/tetris-j.png" width="75px" height="50px"/>
-        <img src="images/tetris-l.png" width="75px" height="50px"/>
-        <img src="images/tetris-s.png" width="75px" height="50px"/>
-        <img src="images/tetris-z.png" width="75px" height="50px"/>
-        <img src="images/tetris-o.png" width="50px" height="50px"/>
-        <img src="images/tetris-t.png" width="75px" height="50px"/>
+        <img src="./blob/main/images/tetris-i.png" width="100px" height="25px"/>
+        <img src="./blob/main/images/tetris-j.png" width="75px" height="50px"/>
+        <img src="./blob/main/images/tetris-l.png" width="75px" height="50px"/>
+        <img src="./blob/main/images/tetris-s.png" width="75px" height="50px"/>
+        <img src="./blob/main/images/tetris-z.png" width="75px" height="50px"/>
+        <img src="./blob/main/images/tetris-o.png" width="50px" height="50px"/>
+        <img src="./blob/main/images/tetris-t.png" width="75px" height="50px"/>
     </p>
 
     테트리스에서 블록이 쌓이는 공간의 각 칸을 2차원 배열에 할당하면, 각 블록의 상태는 $4 \times 4$ 배열로 모두 나타낼 수 있다.
@@ -164,9 +164,9 @@
 
 1. **블록 배치**
     
-    먼저 테트리스 게임을 진행하며 게임 판에 블록을 떨어뜨리는 기능을 수행하는 `block_drop` 함수를 설계하였다.
+    먼저 테트리스 게임을 진행하며 게임 판에 블록을 떨어뜨리는 기능을 수행하는 `block_drop` 함수를 설계했다.
 
-    ```py
+    ```python
     def block_drop(board, block_type, x): # Make a block be dropped on the board. Needs the x coord to use
         x += X_INDENT
         x -= finding_void(block_type)
@@ -193,7 +193,7 @@
     `block_drop` 함수를 구현하는 데 사용된 `finding_void` 함수와 `collision` 함수는 각각 다음을 수행한다.
     * `finding_void`: 블록의 상태를 나타낸 배열에서 왼쪽의 빈 열의 수를 반환
 
-        ```py
+        ```python
         def finding_void(block_type): # Returns the length of a block's left side void, making the block dropped from the left side of a board
             for x in range(4):
                 for y in range(4):
@@ -202,7 +202,7 @@
     
     * `collision`: 블록의 $x$좌표와 $y$좌표를 받아, 이미 쌓여 있는 블록 또는 바닥과 충돌했는지 여부를 반환
 
-        ```py
+        ```python
         def collision(board, block_type, x, y): # Checks whether a block collides or not
             for i in range(y, y+4):
                 for j in range(x, x+4):
@@ -640,7 +640,7 @@
     프로젝트에서 구현한 게임 진행 시각화 장면은 아래와 같다.
 
     <p align='center'>
-        <img src="images/tetris-layout.png" width="35%"/>
+        <img src="./blob/main/images/tetris-layout.png" width="35%"/>
     </p>
 
     게임 판의 형태는 속이 빈 정사각형으로, 게임 판과 그 외 UI의 구분은 속이 채워진 검은색 정사각형으로 했고, 다음에 등장할 블록의 모양은 화면 오른쪽에 파란색 정사각형으로 나타냈다.
