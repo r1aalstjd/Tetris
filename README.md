@@ -85,15 +85,15 @@
 
     테트리스에는 다음과 같이 총 7가지의 블록 모양이 존재한다.
 
-<p align='center'>
-    <img src="images/tetris-i.png" width="100px" height="25px"/>
-    <img src="images/tetris-j.png" width="75px" height="50px"/>
-    <img src="images/tetris-l.png" width="75px" height="50px"/>
-    <img src="images/tetris-s.png" width="75px" height="50px"/>
-    <img src="images/tetris-z.png" width="75px" height="50px"/>
-    <img src="images/tetris-o.png" width="50px" height="50px"/>
-    <img src="images/tetris-t.png" width="75px" height="50px"/>
-</p>
+    <p align='center'>
+        <img src="images/tetris-i.png" width="100px" height="25px"/>
+        <img src="images/tetris-j.png" width="75px" height="50px"/>
+        <img src="images/tetris-l.png" width="75px" height="50px"/>
+        <img src="images/tetris-s.png" width="75px" height="50px"/>
+        <img src="images/tetris-z.png" width="75px" height="50px"/>
+        <img src="images/tetris-o.png" width="50px" height="50px"/>
+        <img src="images/tetris-t.png" width="75px" height="50px"/>
+    </p>
 
     테트리스에서 블록이 쌓이는 공간의 각 칸을 2차원 배열에 할당하면, 각 블록의 상태는 $4 \times 4$ 배열로 모두 나타낼 수 있다.
     
@@ -165,6 +165,7 @@
 1. **블록 배치**
     
     먼저 테트리스 게임을 진행하며 게임 판에 블록을 떨어뜨리는 기능을 수행하는 `block_drop` 함수를 설계하였다.
+
     ```py
     def block_drop(board, block_type, x): # Make a block be dropped on the board. Needs the x coord to use
         x += X_INDENT
@@ -191,13 +192,16 @@
 
     `block_drop` 함수를 구현하는 데 사용된 `finding_void` 함수와 `collision` 함수는 각각 다음을 수행한다.
     * `finding_void`: 블록의 상태를 나타낸 배열에서 왼쪽의 빈 열의 수를 반환
+
         ```py
         def finding_void(block_type): # Returns the length of a block's left side void, making the block dropped from the left side of a board
             for x in range(4):
                 for y in range(4):
                     if block_type[y][x]: return x
         ```
+    
     * `collision`: 블록의 $x$좌표와 $y$좌표를 받아, 이미 쌓여 있는 블록 또는 바닥과 충돌했는지 여부를 반환
+
         ```py
         def collision(board, block_type, x, y): # Checks whether a block collides or not
             for i in range(y, y+4):
@@ -362,6 +366,7 @@
 
     `block_drop` 함수를 구현하는 데 사용된 함수는 각각 다음을 수행한다.
     * `removeline`: 현재 위치에 블록을 배치했을 때 지워지는 줄의 수와 줄이 지워진 후 게임 판의 상태를 반환
+
         ```py
         def removeline(board):
             line = 0
@@ -383,8 +388,11 @@
                 i -= 1
             return board, line
         ```
+    
     * `deepcopy`: 배열의 깊은 복사를 수행
+    
     * `dfs`: DFS 알고리즘을 이용해 게임 판에 존재하는 빈 공간의 수를 계산
+    
         ```py
         def dfs(x, y, board, visit, n):
             if x < X_INDENT or x > X_INDENT+9 or y > 24 or y < 0: return
@@ -399,7 +407,9 @@
                 if not visit[q][p] and not board[q][p]:
                     dfs(p, q, board, visit, n)
         ```
+    
     * `getdensity`: 현재 위치에 블록을 배치했을 때 기존 블록과 인접하는 블록의 수를 반환
+
         ```py
         def getdensity(board, priv_board):
             cnt = 0
@@ -630,7 +640,7 @@
     프로젝트에서 구현한 게임 진행 시각화 장면은 아래와 같다.
 
     <p align='center'>
-        <img src="images/tetris-layout.png" width="35%" height="35%"/>
+        <img src="images/tetris-layout.png" width="35%"/>
     </p>
 
     게임 판의 형태는 속이 빈 정사각형으로, 게임 판과 그 외 UI의 구분은 속이 채워진 검은색 정사각형으로 했고, 다음에 등장할 블록의 모양은 화면 오른쪽에 파란색 정사각형으로 나타냈다.
