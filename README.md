@@ -1,16 +1,14 @@
 # Tetris
 
-<div style="width: 600px; margin: auto;">
-    <div style="float:left; margin: 20px 20px 20px 20px" >
-        <img src="./images/playing-Tetris.gif" width="250" height="35%"/>
-        <div align='center'> 학습 완료 후 플레이 모습 </div>
-    </div>
-    <div style="float:left; margin: 20px 20px 20px 20px">
-        <img src="./images/playing-Tetris-10xSlower.gif" width="250" height="35%"/>
-        <div align='center'> 0.1배속 </div>
-    </div>
-    <div style="clear:both"></div>
-</div>
+<p align='center'>
+    <img src="./images/playing-Tetris.gif" width="250"/>
+    <div align='center'> 학습 완료 후 플레이 모습 </div>
+</p>
+
+<p align='center'>
+    <img src="./images/playing-Tetris-10xSlower.gif" width="250"/>
+    <div align='center'> 0.1배속 </div>
+</p>
 
 &nbsp;
 
@@ -86,15 +84,16 @@
 1. 블록 모양
 
     테트리스에는 다음과 같이 총 7가지의 블록 모양이 존재한다.
-    <p align='center'>
-        <img src="./images/tetris-i.png" width="100px" height="25px"/>
-        <img src="./images/tetris-j.png" width="75px" height="50px"/>
-        <img src="./images/tetris-l.png" width="75px" height="50px"/>
-        <img src="./images/tetris-s.png" width="75px" height="50px"/>
-        <img src="./images/tetris-z.png" width="75px" height="50px"/>
-        <img src="./images/tetris-o.png" width="50px" height="50px"/>
-        <img src="./images/tetris-t.png" width="75px" height="50px"/>
-    </p>
+
+<p align='center'>
+    <img src="images/tetris-i.png" width="100px" height="25px"/>
+    <img src="images/tetris-j.png" width="75px" height="50px"/>
+    <img src="images/tetris-l.png" width="75px" height="50px"/>
+    <img src="images/tetris-s.png" width="75px" height="50px"/>
+    <img src="images/tetris-z.png" width="75px" height="50px"/>
+    <img src="images/tetris-o.png" width="50px" height="50px"/>
+    <img src="images/tetris-t.png" width="75px" height="50px"/>
+</p>
 
     테트리스에서 블록이 쌓이는 공간의 각 칸을 2차원 배열에 할당하면, 각 블록의 상태는 $4 \times 4$ 배열로 모두 나타낼 수 있다.
     
@@ -631,7 +630,7 @@
     프로젝트에서 구현한 게임 진행 시각화 장면은 아래와 같다.
 
     <p align='center'>
-        <img src="./images/tetris-layout.png" width="35%" height="35%"/>
+        <img src="images/tetris-layout.png" width="35%" height="35%"/>
     </p>
 
     게임 판의 형태는 속이 빈 정사각형으로, 게임 판과 그 외 UI의 구분은 속이 채워진 검은색 정사각형으로 했고, 다음에 등장할 블록의 모양은 화면 오른쪽에 파란색 정사각형으로 나타냈다.
