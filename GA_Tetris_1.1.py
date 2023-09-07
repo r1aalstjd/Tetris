@@ -532,8 +532,8 @@ def play_game(weight, gen, child):
 
     pg.init()
     pg.display.set_caption('Tetris')
-    icon = pg.image.load('../etc/1.png')
-    pg.display.set_icon(icon)
+    #icon = pg.image.load('../etc/1.png')
+    #pg.display.set_icon(icon)
     screen = pg.display.set_mode([270, 320])
     screen.fill([255, 255, 255])
 

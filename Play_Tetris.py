@@ -514,7 +514,7 @@ def play_game(weight):
 
     pg.init()
     pg.display.set_caption('Tetris')
-    icon = pg.image.load('../etc/1.png')
+    icon = pg.image.load('./images/tetris-o.png')
     pg.display.set_icon(icon)
     screen = pg.display.set_mode([270, 320])
     screen.fill([255, 255, 255])
@@ -574,7 +574,6 @@ def play_game(weight):
                     pg.draw.rect(screen, [128, 128, 128], [5+15*(j-9), 5+15*(i-5), 12, 12], 1)
 
         pg.display.flip()
-        time.sleep(0.15)
 
         game_board, line_del = removeline(game_board)
         line_score += line_del ** 2
@@ -620,7 +619,6 @@ def play_game(weight):
                 break
 
         del next_blocks[0]
-        time.sleep(0.15)
     return line_score
 
 Gene = [      40,    -26,     -2,    -23,    -71,     14,     33,     16]
